@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reporte de CPanel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div id="loader" class="loader">
+  <div class="spinner"></div>
+  <p>Cargando datos desde Google Sheets…</p>
+</div>
+
+<div id="error" class="error-box" hidden>
+  <strong>No se pudieron cargar los datos.</strong>
+  <p id="error-msg"></p>
+</div>
+
+<main id="app" class="app" hidden>
+
+  <!-- AVISO MODO DEMO -->
+  <div id="demo-banner" class="demo-banner" hidden>
+    ⚠️ <b>Modo de ejemplo:</b> estos datos NO son reales. Para ver tu información real,
+    configura tu <b>API Key</b> y el <b>ID del Sheet</b> en el archivo <b>config.js</b>.
+  </div>
+
+  <!-- ENCABEZADO -->
+  <header class="header">
+    <div class="header-left">
+      <span class="header-icon">📋</span>
+      <div>
+        <h1>REPORTE DE CPANEL</h1>
+        <p>ACTUALIZACIÓN DE CLIENTES EN CPANEL</p>
+      </div>
+    </div>
+    <div class="header-date">
+      <span class="cal-icon">📅</span>
+      <div>
+        <span class="date-label">FECHA</span>
+        <span id="fecha" class="date-value"></span>
+      </div>
+    </div>
+  </header>
+
+  <!-- RESUMEN GENERAL -->
+  <section class="block">
+    <h2 class="block-title">RESUMEN GENERAL</h2>
+    <div class="resumen-grid">
+      <div class="kpi-cards">
+        <div class="kpi">
+          <div class="kpi-ico ico-blue">👥</div>
+          <div class="kpi-num" id="k-prog">4</div>
+          <div class="kpi-lbl">PROGRAMADORES<br>ASIGNADOS</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-ico ico-blue">🏢</div>
+          <div class="kpi-num" id="k-total">0</div>
+          <div class="kpi-lbl">EMPRESAS<br>TOTALES</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-ico ico-green">✔️</div>
+          <div class="kpi-num green" id="k-verde">0</div>
+          <div class="kpi-lbl">VERDE SATISFACTORIO</div>
+          <div class="kpi-pct green" id="k-verde-pct">0%</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-ico ico-gray">📞</div>
+          <div class="kpi-num" id="k-llamar">0</div>
+          <div class="kpi-lbl">EMPRESAS<br>POR LLAMAR</div>
+          <div class="kpi-pct gray" id="k-llamar-pct">0%</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-ico ico-red">⚠️</div>
+          <div class="kpi-num red" id="k-rojo">0</div>
+          <div class="kpi-lbl">ROJO NO ACTUALIZADO</div>
+          <div class="kpi-pct red" id="k-rojo-pct">0%</div>
+        </div>
+      </div>
+
+      <div class="estado-general">
+        <h3>ESTADO GENERAL DE CLIENTES</h3>
+        <div class="donut-wrap">
+          <div class="donut-chart" id="main-donut">
+            <div class="donut-center">
+              <span class="donut-total" id="d-total">0</span>
+              <span class="donut-sub">EMPRESAS<br>TOTALES</span>
+            </div>
+          </div>
+          <ul class="donut-legend">
+            <li><span class="dot green"></span> Verde satisfactorio <b id="lg-verde">0 (0%)</b></li>
+            <li><span class="dot gray"></span> Empresas por llamar <b id="lg-llamar">0 (0%)</b></li>
+            <li><span class="dot red"></span> Rojo no actualizado <b id="lg-rojo">0 (0%)</b></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ESTADO POR PROGRAMADOR -->
+  <section class="block">
+    <h2 class="block-title">ESTADO POR PROGRAMADOR</h2>
+    <div class="prog-grid" id="prog-grid"></div>
+  </section>
+
+  <!-- INCIDENCIAS -->
+  <section class="block">
+    <h2 class="block-title">INCIDENCIAS DETECTADAS</h2>
+    <div class="inc-grid">
+      <div class="inc-card inc-red">
+        <div class="inc-head red-bg">ALTA PRIORIDAD</div>
+        <div class="inc-body">
+          <p>Clientes en estado rojo (pendientes críticos):</p>
+          <div class="inc-num red" id="inc-rojo">0</div>
+        </div>
+      </div>
+      <div class="inc-card inc-yellow">
+        <div class="inc-head yellow-bg">EMPRESAS POR LLAMAR</div>
+        <div class="inc-body">
+          <p>Clientes sin contacto aún:</p>
+          <div class="inc-num yellow" id="inc-llamar">0</div>
+          <small>• Requieren contacto inmediato</small>
+        </div>
+      </div>
+      <div class="inc-card inc-green">
+        <div class="inc-head green-bg">EMPRESAS ACTUALIZADAS</div>
+        <div class="inc-body">
+          <p>Clientes actualizados correctamente:</p>
+          <div class="inc-num green" id="inc-verde">0</div>
+          <small>• Información verificada en CPanel</small>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PRIORIDADES + ACUERDOS -->
+  <section class="block two-col">
+    <div class="panel">
+      <h3 class="panel-title">PRIORIDADES PARA MAÑANA</h3>
+      <div class="prio">
+        <span class="prio-ico">📈</span>
+        <div><b class="red">PRIORIDAD ALTA</b><p>Contactar empresas en estado rojo y actualizar información pendiente.</p></div>
+      </div>
+      <div class="prio">
+        <span class="prio-ico">👥</span>
+        <div><b class="orange">PRIORIDAD MEDIA</b><p>Llamar a las empresas pendientes de contacto.</p></div>
+      </div>
+      <div class="prio">
+        <span class="prio-ico">📋</span>
+        <div><b class="green">PRIORIDAD BAJA</b><p>Verificar y validar actualizaciones realizadas.</p></div>
+      </div>
+    </div>
+    <div class="panel">
+      <h3 class="panel-title">ACUERDOS PARA EL EQUIPO</h3>
+      <ol class="acuerdos">
+        <li><span class="num">1</span> Todo cliente debe quedar con un estado definido:
+          <span class="states-inline">
+            <span class="dot green"></span>Verde
+            <span class="dot orange"></span>Naranja
+            <span class="dot red"></span>Rojo
+            <span class="dot gray"></span>Plomo
+          </span>
+        </li>
+        <li><span class="num">2</span> Ningún cliente debe quedar sin observaciones.</li>
+        <li><span class="num">3</span> Toda incidencia técnica debe registrarse con una breve descripción.</li>
+        <li><span class="num">4</span> Los casos bloqueados deben escalarse al equipo de desarrollo el mismo día.</li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- LEYENDA -->
+  <section class="block leyenda">
+    <div class="ley-item"><span class="ley-ico green-bg">✔️</span><div><b class="green">VERDE SATISFACTORIO</b><p>Cliente actualizado correctamente.</p></div></div>
+    <div class="ley-item"><span class="ley-ico gray-bg">📞</span><div><b class="gray">EMPRESAS POR LLAMAR</b><p>Aún no contactadas. Requieren llamada.</p></div></div>
+    <div class="ley-item"><span class="ley-ico red-bg">⚠️</span><div><b class="red">ROJO NO ACTUALIZADO</b><p>Empresas con problema técnico o en proceso pendiente de actualización.</p></div></div>
+  </section>
+
+  <footer class="footer">
+    <span>ℹ️ Este reporte se actualiza automáticamente con la información registrada en CPANEL.</span>
+    <button id="refresh-btn" class="refresh-btn">↻ Actualizar</button>
+  </footer>
+
+</main>
+
+<script src="config.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
